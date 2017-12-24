@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">蝰蛇音效驱动挂载器</string>
+    <string name="mount_point_statu">挂载点状态</string>
+    <string name="mounted">已挂载</string>
+    <string name="unmounted">未挂载</string>
+    <string name="driver_status">驱动程序状态</string>
+    <string name="loaded">已装载</string>
+    <string name="unloaded">未装载</string>
+    <string name="mount_and_restart_media">挂载并重启媒体服务</string>
+    <string name="umount_and_restart_media">卸载并重启媒体服务</string>
+    <string name="options">选项</string>
+    <string name="error_raise">发生错误</string>
+    <string name="copy_log">复制日志</string>
+    <string name="log_copied">日志已复制</string>
+    <string name="ojbk">确定</string>
+    <string name="mounting">正在执行挂载操作</string>
+    <string name="mount_success">操作已成功完成</string>
+    <string name="mount_failure">操作未能成功完成</string>
+
+    <string name="app_option">应用程序选项</string>
+    <string name="mount_option">挂载选项</string>
+    <string name="selinux_option">SELinux选项</string>
+    <string name="auto_mount_on_boot">系统启动时自动挂载</string>
+    <string name="use_tmpfs">使用临时文件系统</string>
+    <string name="disable_other_effects">禁用其他音效</string>
+    <string name="patch_audio_policy">删除音频策略配置文件无用区块</string>
+    <string name="trim_useless_blocks">去除音效配置文件无用区块</string>
+    <string name="selinux_options">SELinux选项</string>
+    <string name="selinux_options_none">不进行任何处理</string>
+    <string name="selinux_options_inject">注入SELinux策略</string>
+    <string name="selinux_options_disable">禁用SELinux</string>
+    <string name="auto_mount_on_boot_summary">在系统启动时自动挂载驱动程序</string>
+    <string name="use_tmpfs_summary">部分系统需要禁用此选项</string>
+    <string name="disable_other_effects_summary">驱动正常但不处理时尝试启用</string>
+    <string name="patch_audio_policy_summary">驱动正常但不处理时尝试启用</string>
+    <string name="trim_useless_blocks_summary">驱动正常但不处理时尝试启用</string>
+    <string name="selinux_options_summary">驱动程序版本正常但驱动状态错误时尝试更改此选项</string>
+    <string name="disable_other_effects_tips">禁用其他音效将可能影响锁屏音频动画的显示</string>
+    <string name="trim_useless_block_tips">去除无用区块将可能影响系统音效的正常运作</string>
+
+    <string name="error_unknwen">发生了未知错误</string>
+    <string name="error_start_program">无法启动挂载程序,请检查ROOT权限配置</string>
+    <string name="error_lost_effects_conf_file">无法找到音效配置文件,请尝试在/system/etc或/system/vendor/etc下创建audio_effects.conf文件</string>
+    <string name="error_lost_soundfx">无法找到目录/system/lib/soundfx,请尝试在此创建目录</string>
+    <string name="error_lost_viperfx">无法检测到已安装的ViPERFX,请安装后重试</string>
+    <string name="error_patch_etc_effects">无法正确修改/system/etc/audio_effects.conf,请尝试"禁用其他音效"选项</string>
+    <string name="error_patch_vendor_effects">无法正确修改/system/vendor/etc/audio_effects.conf,请尝试"禁用其他音效"选项</string>
+    <string name="error_copy_orgin_libraries">无法复制系统原有音效驱动,请尝试"禁用其他音效"选择</string>
+    <string name="error_extract_library">无法释放驱动程序,请确定已安装有效的ViPERFX</string>
+    <string name="error_mount_etc_effects">无法挂载到/system/etc/audio_effects.conf,请尝试禁用"使用临时文件系统"选项</string>
+    <string name="error_mount_vendor_effects">无法挂载到/system/vendor/etc/audio_effects.conf,请尝试禁用"使用临时文件系统"选项</string>
+    <string name="error_mount_soundfx">无法挂载到/system/lib/soundfx,请尝试禁用"使用临时文件系统"选项</string>
+
+
+</resources>
