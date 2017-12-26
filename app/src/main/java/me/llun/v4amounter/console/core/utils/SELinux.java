@@ -11,7 +11,7 @@ public class SELinux {
 			int statu = inputStream.read();
 			inputStream.close();
 			return statu == '1';
-		} catch (IOException e) {
+		} catch (IOException ignored) {
 		}
 
 		return false;
@@ -22,17 +22,15 @@ public class SELinux {
 			FileOutputStream outputStream = new FileOutputStream("/sys/fs/selinux/enforce");
 			outputStream.write(enforce ? '1' : '0');
 			outputStream.close();
-		} catch (IOException e) {
+		} catch (IOException ignored) {
 		}
 	}
 
 	public static boolean policyInject(String source, String target, String type, String... permissions) throws InterruptedException, IOException {
-		boolean result =
-				Shell.run("supolicy --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
-						Shell.run("sepolicy --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
-						Shell.run("sepolicy-inject --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
-						Shell.run("sepolicy-inject -c " + type + " -s " + source + " -t " + target + " -p " + concatString(permissions, ',') + " --load").isSuccess();
-		return result;
+		return Shell.run("supolicy --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
+				Shell.run("sepolicy --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
+				Shell.run("sepolicy-inject --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
+				Shell.run("sepolicy-inject -c " + type + " -s " + source + " -t " + target + " -p " + concatString(permissions, ',') + " --load").isSuccess();
 	}
 
 	private static String concatString(String[] strs, char separate) {

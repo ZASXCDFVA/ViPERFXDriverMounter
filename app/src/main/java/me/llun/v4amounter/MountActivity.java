@@ -56,11 +56,6 @@ public class MountActivity extends AppCompatActivity implements TaskRunner.Callb
 	}
 
 	@Override
-	protected void onStop() {
-		super.onStop();
-	}
-
-	@Override
 	public void onTaskFinished(final int request, final int errorCode, String output, final boolean isDriverMounted, final boolean isFriverLoaded) {
 		runOnUiThread(new Runnable() {
 			@Override

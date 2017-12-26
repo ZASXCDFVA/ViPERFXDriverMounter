@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class ShUtils {
 	public static void copyDirectory(String source, String target) throws IOException {
 		File src = new File(source);
@@ -26,7 +27,7 @@ public class ShUtils {
 			FileInputStream input = new FileInputStream(entry);
 			FileOutputStream output = new FileOutputStream(outputFile);
 			byte[] buffer = new byte[4096];
-			int readSize = 0;
+			int readSize;
 
 			while ((readSize = input.read(buffer)) > 0) {
 				output.write(buffer, 0, readSize);
@@ -43,7 +44,7 @@ public class ShUtils {
 		FileOutputStream outputStream = new FileOutputStream(outputFile);
 		ZipEntry zipEntry = zipFile.getEntry(entry);
 		InputStream inputStream = zipFile.getInputStream(zipEntry);
-		int readSize = 0;
+		int readSize;
 		byte[] buffer = new byte[4096];
 
 		while ((readSize = inputStream.read(buffer)) > 0) {
@@ -54,5 +55,15 @@ public class ShUtils {
 		outputStream.close();
 		zipEntry.clone();
 		zipFile.close();
+	}
+
+	public static void touch(String path) throws IOException {
+		File file = new File(path);
+		if ( file.exists() ) {
+			file.setLastModified(System.currentTimeMillis());
+		}
+		else {
+			file.createNewFile();
+		}
 	}
 }

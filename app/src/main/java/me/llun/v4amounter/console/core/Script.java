@@ -9,7 +9,9 @@ import me.llun.v4amounter.console.core.utils.ShUtils;
 import me.llun.v4amounter.console.core.utils.Shell;
 import me.llun.v4amounter.shared.GlobalProperty;
 import me.llun.v4amounter.shared.StatusUtils;
+import me.llun.v4amounter.ui.exec.tools.SuShell;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class Script {
 	public static void mount(MountProperty property) throws IOException, AudioConfParser.FormatException, InterruptedException, Shell.ShellResult.ShellException {
 		boolean hasSELinux = SystemUtils.hasSELinuxSupport();
@@ -90,9 +92,12 @@ public class Script {
 		new File(property.mountPoint + "/soundfx").mkdirs();
 		ShUtils.unzip(property.packagePath, property.libraryEntry, property.mountPoint + "/soundfx/libviperfx.so");
 
+		ShUtils.touch(property.mountPoint + "/prevent_access_file");
+
 		Shell.run("chcon -R u:object_r:system_file:s0 " + property.mountPoint);
 		Shell.run("chown -R root:root " + property.mountPoint);
 		Shell.run("chmod -R 0755 " + property.mountPoint);
+		Shell.run("chmod 000 " + property.mountPoint + "/prevent_access_file");
 
 		if (hasSystemEtcEffects) {
 			StatusUtils.printStatus(StatusUtils.MOUNT_ETC_EFFECTS);
@@ -106,6 +111,8 @@ public class Script {
 		Shell.run("mount -o bind " + property.mountPoint + "/soundfx /system/lib/soundfx").assertResult();
 
 		Shell.run("mount -o bind " + property.mountPoint + "/audio_policy.conf /system/etc/audio_policy.conf");
+		Shell.run("mount -o bind " + property.mountPoint + "/prevent_access_file /system/etc/audio_effects.xml");
+		Shell.run("mount -o bind " + property.mountPoint + "/prevent_access_file /system/vendor/etc/audio_effects.xml");
 
 		if (hasSELinux && isEnforcing && property.patchSELinuxPolicy) {
 			injectSuccess = SELinux.policyInject("audioserver", "audioserver_tmpfs", "file", "read", "write", "execute")
@@ -124,6 +131,7 @@ public class Script {
 		StatusUtils.printStatus(StatusUtils.SUCCESS);
 	}
 
+	@SuppressWarnings("StatementWithEmptyBody")
 	public static void umount(String mountPoint) throws InterruptedException, IOException {
 		boolean hasSELinux = SystemUtils.hasSELinuxSupport();
 		boolean isEnforcing = SELinux.isEnforcing();
