@@ -63,10 +63,8 @@ public class AudioEffectsPatcher {
 					remove = false;
 			}
 
-			if (remove) {
+			if (remove)
 				iterator.remove();
-				System.out.println(title);
-			}
 		}
 	}
 
