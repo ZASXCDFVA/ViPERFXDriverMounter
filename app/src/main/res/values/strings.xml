@@ -23,6 +23,8 @@
     <string name="mount_option">挂载选项</string>
     <string name="selinux_option">SELinux选项</string>
     <string name="auto_mount_on_boot">系统启动时自动挂载</string>
+    <string name="version_option">选择版本</string>
+    <string name="version_option_summary">选择需要挂载的蝰蛇音效版本</string>
     <string name="use_tmpfs">使用临时文件系统</string>
     <string name="disable_other_effects">禁用其他音效</string>
     <string name="patch_audio_policy">删除音频策略配置文件无用区块</string>

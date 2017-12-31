@@ -1,5 +1,6 @@
 package me.llun.v4amounter.console.core.patcher;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -10,7 +11,7 @@ import me.llun.v4amounter.console.core.conf.AudioConfParser;
 
 /**
  * Created by null on 17-12-27.
- *
+ * For less then Android O
  */
 
 public class ConfAudioEffectsPatcher extends AudioEffectsPatcher {
@@ -18,8 +19,12 @@ public class ConfAudioEffectsPatcher extends AudioEffectsPatcher {
 		root = AudioConfParser.parse(file);
 	}
 
+	public ConfAudioEffectsPatcher() {
+		root = new AudioConfNode("root");
+	}
+
 	@Override
-	public void putEffect(String name, String library, String libraryPath, String uuid) {
+	public void putEffect(String name, String library, String libraryPath, String uuid, String soundFxDirectory) {
 		AudioConfNode libraries = root.findNodeByPath("/libraries");
 		if (libraries == null) {
 			libraries = new AudioConfNode("libraries");
@@ -32,7 +37,7 @@ public class ConfAudioEffectsPatcher extends AudioEffectsPatcher {
 			root.addChild(effects);
 		}
 
-		libraries.addChild(new AudioConfNode(library)).addValue("path", libraryPath);
+		libraries.addChild(new AudioConfNode(library)).addValue("path", soundFxDirectory + File.separator + libraryPath);
 		effects.addChild(new AudioConfNode(name)).addValue("library", library).addValue("uuid", uuid);
 	}
 
@@ -71,10 +76,10 @@ public class ConfAudioEffectsPatcher extends AudioEffectsPatcher {
 	}
 
 	@Override
-	public void write(String output) throws IOException {
+	public void write(String output) throws Exception {
 		FileOutputStream stream = new FileOutputStream(output);
 		stream.write("# Automatically generated file.\n".getBytes());
-		stream.write("# DONT EDIT this file, it will reset after reboot.\n\n".getBytes());
+		stream.write("# DON'T EDIT this file, it will reset after reboot.\n\n".getBytes());
 		AudioConfParser.writeToStream(root, stream);
 		stream.close();
 	}

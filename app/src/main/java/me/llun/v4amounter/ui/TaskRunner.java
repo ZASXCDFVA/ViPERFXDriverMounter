@@ -34,8 +34,6 @@ public class TaskRunner extends Thread {
 			case REFRESH:
 				this.refresh();
 				break;
-			default:
-				return;
 		}
 	}
 
@@ -46,7 +44,7 @@ public class TaskRunner extends Thread {
 		if (refreshResult.isDriverLoaded ^ refreshResult.isDriverMounted) {
 			try {
 				Thread.sleep(1000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 			RestartTask.start(context);
 			refreshResult = RefreshTask.start();
@@ -62,7 +60,7 @@ public class TaskRunner extends Thread {
 		if (refreshResult.isDriverLoaded ^ refreshResult.isDriverMounted) {
 			try {
 				Thread.sleep(1000);
-			} catch (InterruptedException e) {
+			} catch (InterruptedException ignored) {
 			}
 			RestartTask.start(context);
 			refreshResult = RefreshTask.start();

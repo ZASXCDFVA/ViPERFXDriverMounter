@@ -1,47 +1,22 @@
 package me.llun.v4amounter.console.core;
 
-import java.util.HashSet;
-import java.util.LinkedList;
-
 public class Options {
-	private HashSet<String> options;
-	private LinkedList<String> data;
+	private String[] arguments;
+	private int currentPosition = 0;
 
-	private Options() {
-		options = new HashSet<>();
-		data = new LinkedList<>();
+	public Options(String[] args) {
+		arguments = args;
 	}
 
-	public static Options parseArguments(String[] args) {
-		Options result = new Options();
+	public String nextArgument() throws OptionParseException {
+		if ( arguments.length == currentPosition )
+			throw new OptionParseException("Invalid argument.");
 
-		for (String arg : args) {
-			if (arg.startsWith("--"))
-				result.options.add(arg);
-			else
-				result.data.add(arg);
-		}
-
-		return result;
+		return arguments[currentPosition++];
 	}
 
-	public <T extends Object> T checkOption(String opt, T exist, T unexist) {
-		if (options.remove(opt))
-			return exist;
-		return unexist;
-	}
-
-	public String readData() throws OptionParseException {
-		String result = data.pollFirst();
-		if (result == null)
-			throw new OptionParseException("Need more arguments.");
-		return result;
-	}
-
-	public void finishParse() throws OptionParseException {
-		if (options.isEmpty() && data.isEmpty())
-			return;
-		throw new OptionParseException("Too more argument." + "options_length=" + options.size() + " datas_length=" + data.size());
+	public boolean hasNext() {
+		return arguments.length != currentPosition;
 	}
 
 	public static class OptionParseException extends Exception {

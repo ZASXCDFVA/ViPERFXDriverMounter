@@ -25,7 +25,7 @@ public class RefreshTask {
 		} catch (Exception e) {
 		}
 
-		UUID uuid = UUID.fromString(GlobalProperty.DEFAULT_VIPERFX_UUID);
+		UUID uuid = UUID.fromString(GlobalProperty.VIPERFX_UUID);
 		AudioEffect.Descriptor[] effects = AudioEffect.queryEffects();
 		if (effects != null) {
 			for (AudioEffect.Descriptor descriptor : AudioEffect.queryEffects()) {
