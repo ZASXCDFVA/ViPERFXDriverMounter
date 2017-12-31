@@ -49,7 +49,7 @@ public class BootCompletedService extends Service implements TaskRunner.Callback
 	}
 
 	@Override
-	public void onTaskFinished(int request, int errorCode, String output, boolean mounted, boolean loaded) {
+	public void onTaskFinished(int request, int errorCode, String output, boolean isDriverMounted, boolean isXHiFiDriverLoaded, boolean isFxDriverLoaded) {
 		if (request != TaskRunner.MOUNT)
 			return;
 

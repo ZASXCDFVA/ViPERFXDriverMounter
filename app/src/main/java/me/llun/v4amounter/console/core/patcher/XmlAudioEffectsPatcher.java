@@ -33,19 +33,16 @@ public class XmlAudioEffectsPatcher extends AudioEffectsPatcher {
 	public XmlAudioEffectsPatcher() throws ParserConfigurationException {
 		DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
 		document = builder.newDocument();
+
+		Element root = document.createElement("audio_effects_conf");
+		root.setAttribute("version" ,"2.0");
+		root.setAttribute("xmlns" ,"http://schemas.android.com/audio/audio_effects_conf/v2_0");
+		document.appendChild(root);
 	}
 
 	@Override
 	public void putEffect(String name, String library, String libraryPath, String uuid, String soundFxDirectory) {
-		NodeList rootList = document.getChildNodes();
-		Element root;
-		if ( rootList.getLength() != 1 ) {
-			root = document.createElement("audio_effects_conf");
-			root.setAttribute("version" ,"2.0");
-			root.setAttribute("xmlns" ,"http://schemas.android.com/audio/audio_effects_conf/v2_0");
-		}
-		else
-			root = (Element) rootList.item(0);
+		Element root = document.getDocumentElement();
 
 		NodeList effectsList = root.getElementsByTagName("effects");
 		if ( effectsList.getLength() != 1 ) {
@@ -82,11 +79,7 @@ public class XmlAudioEffectsPatcher extends AudioEffectsPatcher {
 
 	@Override
 	public void removeEffects(String... uuid) {
-		NodeList rootList = document.getChildNodes();
-		if ( rootList.getLength() != 1 )
-			return ;
-
-		Element root = (Element) rootList.item(0);
+		Element root = document.getDocumentElement();
 
 		NodeList effectsList = root.getElementsByTagName("effects");
 		if ( effectsList.getLength() > 0 ) {
@@ -109,28 +102,28 @@ public class XmlAudioEffectsPatcher extends AudioEffectsPatcher {
 
 	@Override
 	public void removeRootNodes(String... excludes) {
-		NodeList rootList = document.getChildNodes();
-		if ( rootList.getLength() != 1 )
-			return ;
-
-		Element root = (Element) rootList.item(0);
+		Element root = document.getDocumentElement();
 
 		NodeList rootItemList = root.getChildNodes();
 		if ( rootItemList.getLength() < 1 )
 			return;
 
 		for ( int i = 0 ; i < rootItemList.getLength() ; i++ ) {
+			Node node = rootItemList.item(i);
+			if ( node.getNodeType() != Node.ELEMENT_NODE )
+				continue;
+
 			boolean remove = true;
 
 			for ( String n : excludes ) {
-				if ( n.equals(rootItemList.item(i).getNodeName()) ) {
+				if ( n.equals(node.getNodeName()) ) {
 					remove = false;
 					break;
 				}
 			}
 
 			if ( remove )
-				root.removeChild(rootItemList.item(i));
+				root.removeChild(node);
 		}
 	}
 

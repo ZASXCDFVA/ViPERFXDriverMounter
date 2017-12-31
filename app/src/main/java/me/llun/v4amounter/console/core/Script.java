@@ -46,7 +46,7 @@ public class Script {
 		StatusUtils.printStatus(StatusUtils.PATCH_EFFECTS_CONF);
 		if (property.trimUselessBlocks) {
 			for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
-				AudioEffectsPatcher patcher = AudioEffectsPatcher.load(file.sourceFile);
+				AudioEffectsPatcher patcher = property.disableOtherEffects ? AudioEffectsPatcher.create(file.sourceFile) : AudioEffectsPatcher.load(file.sourceFile);
 				patcher.removeRootNodes("effects" ,"libraries");
 				for ( MountProperty.Effect effect : property.effects ) {
 					patcher.removeEffects(effect.uuid);
@@ -56,7 +56,7 @@ public class Script {
 			}
 		} else {
 			for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
-				AudioEffectsPatcher patcher = AudioEffectsPatcher.load(file.sourceFile);
+				AudioEffectsPatcher patcher = property.disableOtherEffects ? AudioEffectsPatcher.create(file.sourceFile) : AudioEffectsPatcher.load(file.sourceFile);
 				for ( MountProperty.Effect effect : property.effects ) {
 					patcher.removeEffects(effect.uuid);
 					patcher.putEffect(effect.name ,effect.library ,effect.libraryName,effect.uuid ,soundFxDirectories[0].sourcePath);

@@ -41,7 +41,7 @@ public class TaskRunner extends Thread {
 		MountTask.MountResult mountResult = MountTask.start(context);
 		RefreshTask.RefreshResult refreshResult = RefreshTask.start();
 
-		if (refreshResult.isDriverLoaded ^ refreshResult.isDriverMounted) {
+		if (refreshResult.isFxDriverLoaded ^ refreshResult.isDriverMounted) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException ignored) {
@@ -50,14 +50,14 @@ public class TaskRunner extends Thread {
 			refreshResult = RefreshTask.start();
 		}
 
-		callback.onTaskFinished(MOUNT, mountResult.errorCode, mountResult.output, refreshResult.isDriverMounted, refreshResult.isDriverLoaded);
+		callback.onTaskFinished(MOUNT, mountResult.errorCode, mountResult.output, refreshResult.isDriverMounted, refreshResult.isXHiFiDriverLoaded, refreshResult.isFxDriverLoaded);
 	}
 
 	private void umount() {
 		new UmountTask(context).start();
 		RefreshTask.RefreshResult refreshResult = RefreshTask.start();
 
-		if (refreshResult.isDriverLoaded ^ refreshResult.isDriverMounted) {
+		if (refreshResult.isFxDriverLoaded ^ refreshResult.isDriverMounted) {
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException ignored) {
@@ -66,16 +66,16 @@ public class TaskRunner extends Thread {
 			refreshResult = RefreshTask.start();
 		}
 
-		callback.onTaskFinished(UMOUNT, 0, "", refreshResult.isDriverMounted, refreshResult.isDriverLoaded);
+		callback.onTaskFinished(UMOUNT, 0, "", refreshResult.isDriverMounted, refreshResult.isXHiFiDriverLoaded, refreshResult.isFxDriverLoaded);
 	}
 
 	private void refresh() {
 		RefreshTask.RefreshResult r = RefreshTask.start();
 
-		callback.onTaskFinished(REFRESH, 0, "", r.isDriverMounted, r.isDriverLoaded);
+		callback.onTaskFinished(REFRESH, 0, "", r.isDriverMounted, r.isXHiFiDriverLoaded, r.isFxDriverLoaded);
 	}
 
 	public interface Callback {
-		void onTaskFinished(int request, int errorCode, String output, boolean isDriverMounted, boolean isDriverLoaded);
+		void onTaskFinished(int request, int errorCode, String output, boolean isDriverMounted, boolean isXHiFiDriverLoaded, boolean isFxDriverLoaded);
 	}
 }
