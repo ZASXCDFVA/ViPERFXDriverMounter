@@ -22,7 +22,6 @@ import me.llun.v4amounter.ui.exec.tools.AssetsTools;
 import me.llun.v4amounter.ui.exec.tools.SuShell;
 
 public class MountTask {
-	public static final String SELINUX_NONE = "0";
 	public static final String SELINUX_INJECT_POLICY = "1";
 	public static final String SELINUX_DISABLE = "2";
 
@@ -67,7 +66,7 @@ public class MountTask {
 		result.append(preference.getBoolean("disable_other_effects", false) ? "--disable-other-effects " : "");
 		result.append(preference.getBoolean("patch_audio_policy", true) ? "--patch-audio-policy " : "");
 		result.append(preference.getBoolean("trim_useless_blocks", true) ? "--trim-useless-blocks " : "");
-		result.append(preference.getBoolean("use_tmpfs", true) ? "--use-tmpfs " : "--use--disk");
+		result.append(preference.getBoolean("use_tmpfs", true) ? "--use-tmpfs " : "--use-disk ");
 
 		switch (preference.getString("selinux_option", "1")) {
 			case SELINUX_DISABLE:
@@ -176,7 +175,7 @@ public class MountTask {
 		return result;
 	}
 
-	public static MountResult parseException(Exception e) {
+	private static MountResult parseException(Exception e) {
 		StringWriter writer = new StringWriter();
 		e.printStackTrace(new PrintWriter(writer));
 

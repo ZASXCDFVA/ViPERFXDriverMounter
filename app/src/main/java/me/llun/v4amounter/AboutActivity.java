@@ -11,7 +11,7 @@ import android.webkit.WebView;
  */
 
 public class AboutActivity extends AppCompatActivity {
-	public static final int VERSION = 2;
+	public static final int VERSION = 3;
 
 	@Override
 	protected void onCreate(@Nullable Bundle savedInstanceState) {

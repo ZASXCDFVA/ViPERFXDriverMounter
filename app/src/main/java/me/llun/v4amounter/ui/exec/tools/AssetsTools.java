@@ -18,7 +18,7 @@ public class AssetsTools {
 		if (outputFile.getParentFile().mkdirs()) {
 			try {
 				new ProcessBuilder("chmod", directoryPermission, outputFile.getParent()).start().waitFor();
-			} catch (IOException | InterruptedException e) {
+			} catch (IOException | InterruptedException ignored) {
 			}
 		}
 
@@ -30,6 +30,9 @@ public class AssetsTools {
 			for (int readLength = inputStream.read(buffer); readLength > 0; readLength = inputStream.read(buffer)) {
 				outputStream.write(buffer, 0, readLength);
 			}
+
+			inputStream.close();
+			outputStream.close();
 		} catch (IOException e) {
 			return false;
 		}
