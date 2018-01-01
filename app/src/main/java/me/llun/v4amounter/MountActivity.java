@@ -62,7 +62,7 @@ public class MountActivity extends AppCompatActivity implements TaskRunner.Callb
 		if ( sharedPreferences.getStringSet("mount_version" ,null) == null )
 			sharedPreferences.edit().putStringSet("mount_version" ,new TreeSet<String>(){{add("1");}}).apply();
 
-		if ( sharedPreferences.getInt("about_display_version" ,-1) < 1 ) {
+		if ( sharedPreferences.getInt("about_display_version" ,-1) < AboutActivity.VERSION ) {
 			Intent intent = new Intent(this ,AboutActivity.class);
 			startActivity(intent);
 			sharedPreferences.edit().putInt("about_display_version" ,AboutActivity.VERSION).apply();
