@@ -82,4 +82,9 @@ public class StatusUtils {
 
 		System.out.println(String.format("[%X] %s", statusCode, printString));
 	}
+
+	public static void printExtraMessage(String msg) {
+		System.out.print("---    ");
+		System.out.println(msg);
+	}
 }

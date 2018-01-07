@@ -21,7 +21,7 @@ public class Script {
 		String mountPoint = property.mountPointMode == MountProperty.MOUNT_POINT_MODE_TMPFS ? GlobalProperty.DEFAULT_MOUNT_POINT_TMPFS : GlobalProperty.DEFAULT_MOUNT_POINT_DISK;
 
 		ScriptUtils.SoundFxDirectory[] soundFxDirectories = ScriptUtils.checkSoundFxDirectory(GlobalProperty.SOUNDFX_DIRECTORIES);
-		ScriptUtils.AudioConfFile[] audioEffectsConfFiles = ScriptUtils.checkPatchFiles(mountPoint ,GlobalProperty.AUDIO_EFFECTS_CONF_FILES);
+		ScriptUtils.AudioConfFile[] audioEffectsConfFiles = ScriptUtils.checkPatchConfFiles(mountPoint ,GlobalProperty.AUDIO_EFFECTS_CONF_FILES);
 
 		if (hasSELinux && isEnforcing)
 			SELinux.setEnforcing(false);
@@ -29,14 +29,21 @@ public class Script {
 		StatusUtils.printStatus(StatusUtils.CHECK_EFFECTS_CONF_FILE);
 		if ( audioEffectsConfFiles.length < 1 )
 			throw new FileNotFoundException("Audio effects configure files not found.");
+		for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles )
+			StatusUtils.printExtraMessage(file.sourceFile + " -> " + file.generatedFile );
 
 		StatusUtils.printStatus(StatusUtils.CHECK_SOUNDFX);
 		if ( soundFxDirectories.length < 1 )
 			throw new FileNotFoundException("Audio soundfx directory not found.");
+		for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories )
+			StatusUtils.printExtraMessage(directory.sourcePath + " -> " + directory.generatedPath);
 
 		StatusUtils.printStatus(StatusUtils.CHECK_PACKAGE);
-		if ( !ScriptUtils.checkPackageExisted(property.effects) )
-			throw new FileNotFoundException("Has invalid package(s).");
+		for ( MountProperty.Effect effect : property.effects ) {
+			StatusUtils.printExtraMessage(effect.packageName);
+			if ( !ScriptUtils.checkPackageExisted(effect) )
+				throw new FileNotFoundException("Has invalid package(s).");
+		}
 
 		new File(mountPoint).mkdirs();
 
@@ -46,6 +53,7 @@ public class Script {
 		StatusUtils.printStatus(StatusUtils.PATCH_EFFECTS_CONF);
 		if (property.trimUselessBlocks) {
 			for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
+				StatusUtils.printExtraMessage(file.sourceFile);
 				AudioEffectsPatcher patcher = property.disableOtherEffects ? AudioEffectsPatcher.create(file.sourceFile) : AudioEffectsPatcher.load(file.sourceFile);
 				patcher.removeRootNodes("effects" ,"libraries");
 				for ( MountProperty.Effect effect : property.effects ) {
@@ -56,6 +64,7 @@ public class Script {
 			}
 		} else {
 			for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
+				StatusUtils.printExtraMessage(file.sourceFile);
 				AudioEffectsPatcher patcher = property.disableOtherEffects ? AudioEffectsPatcher.create(file.sourceFile) : AudioEffectsPatcher.load(file.sourceFile);
 				for ( MountProperty.Effect effect : property.effects ) {
 					patcher.removeEffects(effect.uuid);
@@ -84,6 +93,7 @@ public class Script {
 		StatusUtils.printStatus(StatusUtils.EXTRACT_LIBRARY);
 		new File(mountPoint + "/soundfx").mkdirs();
 		for ( MountProperty.Effect effect : property.effects ) {
+			StatusUtils.printExtraMessage(effect.packageName);
 			for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories ) {
 				new File(mountPoint + File.separator + directory.generatedPath).mkdirs();
 				ShUtils.unzip(effect.packagePath ,effect.packageLibraryEntry ,mountPoint + File.separator + directory.generatedPath + File.separator + effect.libraryName);
@@ -99,11 +109,13 @@ public class Script {
 
 		StatusUtils.printStatus(StatusUtils.MOUNT_EFFECTS_FILES);
 		for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
+			StatusUtils.printExtraMessage(file.sourceFile);
 			Shell.run("mount -o bind " + mountPoint + "/" + file.generatedFile + " " + file.sourceFile).assertResult();
 		}
 
 		StatusUtils.printStatus(StatusUtils.MOUNT_LIBRARIES);
 		for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories ) {
+			StatusUtils.printExtraMessage(directory.sourcePath);
 			Shell.run("mount -o bind " + mountPoint + File.separator + directory.generatedPath + " " + directory.sourcePath).assertResult();
 		}
 
