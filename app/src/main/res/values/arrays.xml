@@ -10,17 +10,4 @@
         <item>1</item>
         <item>2</item>
     </string-array>
-    <string-array name="version_options">
-        <item>ViPERFX</item>
-        <item>ViPER4Android FX</item>
-        <item>ViPER4Android XHiFi</item>
-    </string-array>
-    <string-array name="version_options_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-    <string-array name="version_optuons_values_default">
-        <item>1</item>
-    </string-array>
 </resources>

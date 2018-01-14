@@ -23,15 +23,15 @@ public class StatusUtils {
 			case CHECK_SOUNDFX:
 				return R.string.error_lost_soundfx;
 			case CHECK_PACKAGE:
-				return R.string.error_lost_viperfx;
+				return R.string.error_lost_package;
 			case PATCH_EFFECTS_CONF:
-				return R.string.error_patch_etc_effects;
+				return R.string.error_patch_effects_conf;
 			case COPY_ORIGIN_LIBRARIES:
 				return R.string.error_copy_orgin_libraries;
 			case EXTRACT_LIBRARY:
 				return R.string.error_extract_library;
 			case MOUNT_EFFECTS_FILES:
-				return R.string.error_mount_etc_effects;
+				return R.string.error_mount_effects_conf;
 			case MOUNT_LIBRARIES:
 				return R.string.error_mount_soundfx;
 			case RUN_PROGRAM:

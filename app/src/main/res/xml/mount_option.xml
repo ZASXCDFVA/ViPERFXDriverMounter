@@ -11,9 +11,6 @@
     <PreferenceCategory
         android:title="@string/mount_option">
         <MultiSelectListPreference
-            android:defaultValue="@array/version_optuons_values_default"
-            android:entries="@array/version_options"
-            android:entryValues="@array/version_options_values"
             android:key="mount_version"
             android:summary="@string/version_option_summary"
             android:title="@string/version_option"/>

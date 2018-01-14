@@ -84,7 +84,10 @@ public class MountTask {
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 		StringBuilder builder = new StringBuilder();
 
-		Set<String> versions = preferences.getStringSet("mount_version", new TreeSet<>(Arrays.asList(new String[]{"1"})));
+		Set<String> versions = preferences.getStringSet("mount_version", new TreeSet<String>());
+
+		if ( versions.size() == 0 )
+			throw new PackageManager.NameNotFoundException("Unselected any viper audio effect.");
 
 		if (versions.contains("2")) {
 			builder.append(" --add-effect v4a_fx:libv4a_fx:libv4a_fx.so:")

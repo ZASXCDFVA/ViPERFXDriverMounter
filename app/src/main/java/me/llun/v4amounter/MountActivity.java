@@ -59,8 +59,10 @@ public class MountActivity extends AppCompatActivity implements TaskRunner.Callb
 
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-		if ( sharedPreferences.getStringSet("mount_version" ,null) == null )
-			sharedPreferences.edit().putStringSet("mount_version" ,new TreeSet<String>(){{add("1");}}).apply();
+		if ( sharedPreferences.getInt("preference_version" ,-1) < MountPreferenceActivity.VERSION ) {
+			sharedPreferences.edit().clear().putInt("preference_version" ,MountPreferenceActivity.VERSION).apply();
+			Toast.makeText(this ,R.string.preference_reset ,Toast.LENGTH_LONG).show();
+		}
 
 		if ( sharedPreferences.getInt("about_display_version" ,-1) < AboutActivity.VERSION ) {
 			Intent intent = new Intent(this ,AboutActivity.class);
