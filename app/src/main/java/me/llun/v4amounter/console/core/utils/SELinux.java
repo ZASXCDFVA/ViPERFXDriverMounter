@@ -26,7 +26,7 @@ public class SELinux {
 		}
 	}
 
-	public static boolean policyInject(String source, String target, String type, String... permissions) throws InterruptedException, IOException {
+	public static boolean policyInject(String source, String target, String type, String... permissions) throws InterruptedException, IOException, Shell.ShellResult.ShellException {
 		return Shell.run("supolicy --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
 				Shell.run("sepolicy --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||
 				Shell.run("sepolicy-inject --live \"allow " + source + " " + target + " " + type + " { " + concatString(permissions, ' ') + " }\" ").isSuccess() ||

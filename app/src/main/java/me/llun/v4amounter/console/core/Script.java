@@ -1,128 +1,139 @@
 package me.llun.v4amounter.console.core;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import me.llun.v4amounter.console.core.conf.AudioConfParser;
+import me.llun.v4amounter.console.core.patcher.AudioEffectsPatcher;
 import me.llun.v4amounter.console.core.utils.SELinux;
 import me.llun.v4amounter.console.core.utils.ShUtils;
 import me.llun.v4amounter.console.core.utils.Shell;
 import me.llun.v4amounter.shared.GlobalProperty;
 import me.llun.v4amounter.shared.StatusUtils;
-import me.llun.v4amounter.ui.exec.tools.SuShell;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class Script {
-	public static void mount(MountProperty property) throws IOException, AudioConfParser.FormatException, InterruptedException, Shell.ShellResult.ShellException {
+	public static void mount(MountProperty property) throws Exception {
 		boolean hasSELinux = SystemUtils.hasSELinuxSupport();
-		boolean hasSystemEtcEffects = SystemUtils.hasSystemEffects();
-		boolean hasSystemVendorEffects = SystemUtils.hasSystemVendorEffects();
 		boolean isEnforcing = SELinux.isEnforcing();
 		boolean injectSuccess = false;
-		AudioEffectsPatcher effectsPatcher;
-		AudioPolicyPatcher policyPatcher;
+
+		String mountPoint = property.mountPointMode == MountProperty.MOUNT_POINT_MODE_TMPFS ? GlobalProperty.DEFAULT_MOUNT_POINT_TMPFS : GlobalProperty.DEFAULT_MOUNT_POINT_DISK;
+
+		ScriptUtils.SoundFxDirectory[] soundFxDirectories = ScriptUtils.checkSoundFxDirectory(GlobalProperty.SOUNDFX_DIRECTORIES);
+		ScriptUtils.AudioConfFile[] audioEffectsConfFiles = ScriptUtils.checkPatchConfFiles(mountPoint ,GlobalProperty.AUDIO_EFFECTS_CONF_FILES);
 
 		if (hasSELinux && isEnforcing)
 			SELinux.setEnforcing(false);
 
 		StatusUtils.printStatus(StatusUtils.CHECK_EFFECTS_CONF_FILE);
-		if (!(hasSystemEtcEffects || hasSystemVendorEffects))
-			throw new IOException("/system/etc/audio_effects.conf and /system/vendor/etc/audio_effects.conf invaild.");
+		if ( audioEffectsConfFiles.length < 1 )
+			throw new FileNotFoundException("Audio effects configure files not found.");
+		for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles )
+			StatusUtils.printExtraMessage(file.sourceFile + " -> " + file.generatedFile );
 
 		StatusUtils.printStatus(StatusUtils.CHECK_SOUNDFX);
-		if (!SystemUtils.hasSystemSoundfx())
-			throw new IOException("/system/lib/soundfx invalid.");
+		if ( soundFxDirectories.length < 1 )
+			throw new FileNotFoundException("Audio soundfx directory not found.");
+		for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories )
+			StatusUtils.printExtraMessage(directory.sourcePath + " -> " + directory.generatedPath);
 
 		StatusUtils.printStatus(StatusUtils.CHECK_PACKAGE);
-		if (!new File(property.packagePath).exists())
-			throw new IOException(property.packagePath + " not found.");
+		for ( MountProperty.Effect effect : property.effects ) {
+			StatusUtils.printExtraMessage(effect.packageName);
+			if ( !ScriptUtils.checkPackageExisted(effect) )
+				throw new FileNotFoundException("Has invalid package(s).");
+		}
 
-		new File(property.mountPoint).mkdirs();
+		new File(mountPoint).mkdirs();
 
-		if (!property.useDiskMountPoint)
-			Shell.run("mount -t tmpfs tmpfs " + property.mountPoint);
+		if (property.mountPointMode == MountProperty.MOUNT_POINT_MODE_TMPFS)
+			Shell.run("mount -t tmpfs tmpfs " + mountPoint);
 
+		StatusUtils.printStatus(StatusUtils.PATCH_EFFECTS_CONF);
 		if (property.trimUselessBlocks) {
-			if (hasSystemEtcEffects) {
-				StatusUtils.printStatus(StatusUtils.PATCH_ETC_EFFECTS);
-				effectsPatcher = property.disableOtherEffects ? new AudioEffectsPatcher() : new AudioEffectsPatcher("/system/etc/audio_effects.conf");
-				effectsPatcher.removeEffects(GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.putEffect("viperfx", "viperfx_library", "/system/lib/soundfx/libviperfx.so", GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.removeRootNodes("effects", "libraries");
-				effectsPatcher.write(property.mountPoint + "/audio_effects.conf.etc");
-			}
-
-			if (hasSystemVendorEffects) {
-				StatusUtils.printStatus(StatusUtils.PATCH_VENDOR_EFFECTS);
-				effectsPatcher = property.disableOtherEffects ? new AudioEffectsPatcher() : new AudioEffectsPatcher("/system/vendor/etc/audio_effects.conf");
-				effectsPatcher.removeEffects(GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.putEffect("viperfx", "viperfx_library", "/system/lib/soundfx/libviperfx.so", GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.removeRootNodes("effects", "libraries");
-				effectsPatcher.write(property.mountPoint + "/audio_effects.conf.vendor");
+			for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
+				StatusUtils.printExtraMessage(file.sourceFile);
+				AudioEffectsPatcher patcher = property.disableOtherEffects ? AudioEffectsPatcher.create(file.sourceFile) : AudioEffectsPatcher.load(file.sourceFile);
+				patcher.removeRootNodes("effects" ,"libraries");
+				for ( MountProperty.Effect effect : property.effects ) {
+					patcher.removeEffects(effect.uuid);
+					patcher.putEffect(effect.name ,effect.library ,effect.libraryName ,effect.uuid ,soundFxDirectories[0].sourcePath);
+				}
+				patcher.write(mountPoint + "/" + file.generatedFile);
 			}
 		} else {
-			if (hasSystemEtcEffects) {
-				StatusUtils.printStatus(StatusUtils.PATCH_ETC_EFFECTS);
-				effectsPatcher = property.disableOtherEffects ? new AudioEffectsPatcher() : new AudioEffectsPatcher("/system/etc/audio_effects.conf");
-				effectsPatcher.removeEffects(GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.putEffect("viperfx", "viperfx_library", "/system/lib/soundfx/libviperfx.so", GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.write(property.mountPoint + "/audio_effects.conf.etc");
-			}
-
-			if (hasSystemVendorEffects) {
-				StatusUtils.printStatus(StatusUtils.PATCH_VENDOR_EFFECTS);
-				effectsPatcher = property.disableOtherEffects ? new AudioEffectsPatcher() : new AudioEffectsPatcher("/system/vendor/etc/audio_effects.conf");
-				effectsPatcher.removeEffects(GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.putEffect("viperfx", "viperfx_library", "/system/lib/soundfx/libviperfx.so", GlobalProperty.DEFAULT_VIPERFX_UUID);
-				effectsPatcher.write(property.mountPoint + "/audio_effects.conf.vendor");
+			for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
+				StatusUtils.printExtraMessage(file.sourceFile);
+				AudioEffectsPatcher patcher = property.disableOtherEffects ? AudioEffectsPatcher.create(file.sourceFile) : AudioEffectsPatcher.load(file.sourceFile);
+				for ( MountProperty.Effect effect : property.effects ) {
+					patcher.removeEffects(effect.uuid);
+					patcher.putEffect(effect.name ,effect.library ,effect.libraryName,effect.uuid ,soundFxDirectories[0].sourcePath);
+				}
+				patcher.write(mountPoint + "/" + file.generatedFile);
 			}
 		}
 
 		if (property.patchAudioPolicy) {
-			policyPatcher = new AudioPolicyPatcher("/system/etc/audio_policy.conf");
+			AudioPolicyPatcher policyPatcher = new AudioPolicyPatcher("/system/etc/audio_policy.conf");
 			policyPatcher.removeNodeIfExisted("/audio_hw_modules/primary/outputs/deep_buffer");
-			policyPatcher.write(property.mountPoint + "/audio_policy.conf");
+			policyPatcher.write(mountPoint + "/audio_policy.conf");
 		}
 
-		StatusUtils.printStatus(StatusUtils.COPY_ORGIN_LIBRARIES);
-		if (!property.disableOtherEffects)
-			ShUtils.copyDirectory("/system/lib/soundfx", property.mountPoint + "/soundfx");
+		new File(mountPoint + "/soundfx").mkdirs();
+
+		if (!property.disableOtherEffects) {
+			StatusUtils.printStatus(StatusUtils.COPY_ORIGIN_LIBRARIES);
+			for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories ) {
+				new File(mountPoint + File.separator + directory.generatedPath).mkdirs();
+				ShUtils.copyDirectory(directory.sourcePath ,mountPoint + File.separator + directory.generatedPath);
+			}
+		}
 
 		StatusUtils.printStatus(StatusUtils.EXTRACT_LIBRARY);
-		new File(property.mountPoint + "/soundfx").mkdirs();
-		ShUtils.unzip(property.packagePath, property.libraryEntry, property.mountPoint + "/soundfx/libviperfx.so");
-
-		ShUtils.touch(property.mountPoint + "/prevent_access_file");
-
-		Shell.run("chcon -R u:object_r:system_file:s0 " + property.mountPoint);
-		Shell.run("chown -R root:root " + property.mountPoint);
-		Shell.run("chmod -R 0755 " + property.mountPoint);
-		Shell.run("chmod 000 " + property.mountPoint + "/prevent_access_file");
-
-		if (hasSystemEtcEffects) {
-			StatusUtils.printStatus(StatusUtils.MOUNT_ETC_EFFECTS);
-			Shell.run("mount -o bind " + property.mountPoint + "/audio_effects.conf.etc /system/etc/audio_effects.conf").assertResult();
+		new File(mountPoint + "/soundfx").mkdirs();
+		for ( MountProperty.Effect effect : property.effects ) {
+			StatusUtils.printExtraMessage(effect.packageName);
+			for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories ) {
+				new File(mountPoint + File.separator + directory.generatedPath).mkdirs();
+				ShUtils.unzip(effect.packagePath ,effect.packageLibraryEntry ,mountPoint + File.separator + directory.generatedPath + File.separator + effect.libraryName);
+			}
 		}
-		if (hasSystemVendorEffects) {
-			StatusUtils.printStatus(StatusUtils.MOUNT_VENDOR_EFFECTS);
-			Shell.run("mount -o bind " + property.mountPoint + "/audio_effects.conf.vendor /system/vendor/etc/audio_effects.conf").assertResult();
+
+		ShUtils.touch(mountPoint + "/prevent_access_file");
+
+		Shell.run("chcon -R u:object_r:system_file:s0 " + mountPoint);
+		Shell.run("chown -R root:root " + mountPoint);
+		Shell.run("chmod -R 0755 " + mountPoint);
+		Shell.run("chmod 000 " + mountPoint + "/prevent_access_file");
+
+		StatusUtils.printStatus(StatusUtils.MOUNT_EFFECTS_FILES);
+		for ( ScriptUtils.AudioConfFile file : audioEffectsConfFiles ) {
+			StatusUtils.printExtraMessage(file.sourceFile);
+			Shell.run("mount -o bind " + mountPoint + "/" + file.generatedFile + " " + file.sourceFile).assertResult();
 		}
+
 		StatusUtils.printStatus(StatusUtils.MOUNT_LIBRARIES);
-		Shell.run("mount -o bind " + property.mountPoint + "/soundfx /system/lib/soundfx").assertResult();
+		for ( ScriptUtils.SoundFxDirectory directory : soundFxDirectories ) {
+			StatusUtils.printExtraMessage(directory.sourcePath);
+			Shell.run("mount -o bind " + mountPoint + File.separator + directory.generatedPath + " " + directory.sourcePath).assertResult();
+		}
 
-		Shell.run("mount -o bind " + property.mountPoint + "/audio_policy.conf /system/etc/audio_policy.conf");
-		Shell.run("mount -o bind " + property.mountPoint + "/prevent_access_file /system/etc/audio_effects.xml");
-		Shell.run("mount -o bind " + property.mountPoint + "/prevent_access_file /system/vendor/etc/audio_effects.xml");
+		Shell.run("mount -o bind " + mountPoint + "/audio_policy.conf /system/etc/audio_policy.conf");
 
-		if (hasSELinux && isEnforcing && property.patchSELinuxPolicy) {
+		if (hasSELinux && isEnforcing && property.selinuxMode == MountProperty.SELINUX_MODE_PATCH_POLICY) {
 			injectSuccess = SELinux.policyInject("audioserver", "audioserver_tmpfs", "file", "read", "write", "execute")
 					|| SELinux.policyInject("mediaserver", "mediaserver_tmpfs", "file", "read", "write", "execute");
 		}
 
-		Shell.run("umount " + property.mountPoint);
+		Shell.run("umount " + mountPoint);
 
-		if (hasSELinux && !property.disableSELinux && isEnforcing && injectSuccess)
+		if (hasSELinux && property.selinuxMode != MountProperty.SELINUX_MODE_DISABLE && isEnforcing && injectSuccess)
 			SELinux.setEnforcing(true);
+
+		for ( MountProperty.Effect effect : property.effects ) {
+			Shell.run("am force-stop " + effect.packageName);
+		}
 
 		StatusUtils.printStatus(StatusUtils.RESTART_SYSTEM_SERVERS);
 		Script.stop();
@@ -140,16 +151,14 @@ public class Script {
 
 		Script.stop();
 
-		while (Shell.run("umount /system/etc/audio_effects.conf").isSuccess()) {
-		}
-		while (Shell.run("umount /system/vendor/etc/audio_effects.conf").isSuccess()) {
-		}
-		while (Shell.run("umount /system/etc/audio_policy.conf").isSuccess()) {
-		}
-		while (Shell.run("umount /system/lib/soundfx").isSuccess()) {
-		}
-		while (Shell.run("umount " + mountPoint).isSuccess()) {
-		}
+		for ( String libraries : GlobalProperty.SOUNDFX_DIRECTORIES )
+			while ( Shell.run("umount " + libraries).isSuccess() ) {}
+
+		for ( String file : GlobalProperty.AUDIO_EFFECTS_CONF_FILES)
+			while ( Shell.run("umount " + file).isSuccess() ) {}
+
+		while (Shell.run("umount /system/etc/audio_policy.conf").isSuccess()) {}
+		while (Shell.run("umount " + mountPoint).isSuccess()) {}
 
 		Script.start();
 
@@ -158,8 +167,6 @@ public class Script {
 	}
 
 	public static void stop() throws InterruptedException, IOException {
-		Shell.run("am force-stop " + GlobalProperty.DEFAILT_VIPERFX_PACKAGE_NAME);
-
 		Shell.run("stop media");
 		Thread.sleep(100);
 		Shell.run("stop audioserver");

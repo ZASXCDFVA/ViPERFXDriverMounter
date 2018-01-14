@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -12,32 +13,46 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
-        android:indeterminate="true"/>
+        android:indeterminate="true"
+        android:visibility="gone"/>
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
-        android:paddingRight="5dp">
+        android:paddingRight="5dp"
+        android:paddingTop="5dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
-                android:text="@string/mount_point_statu"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                android:text="@string/mount_point_status"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/driver_status"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                android:layout_marginTop="4dp"
+                android:text="@string/viperfx_driver_status"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/fx_driver_status"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/xhifi_driver_status"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
         </LinearLayout>
 
@@ -45,22 +60,37 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            tools:ignore="RtlHardcoded">
 
             <TextView
                 android:id="@+id/mount_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="4dp"
                 android:text="@string/unmounted"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
             <TextView
-                android:id="@+id/driver_status"
+                android:id="@+id/viperfx_driver_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="@string/unloaded"
-                android:textAppearance="?android:attr/textAppearanceMedium"/>
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+            <TextView
+                android:id="@+id/fx_driver_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/unloaded"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
+
+            <TextView
+                android:id="@+id/xhifi_driver_status"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/unloaded"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"/>
 
         </LinearLayout>
 

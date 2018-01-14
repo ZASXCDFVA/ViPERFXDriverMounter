@@ -4,25 +4,36 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.ArraySet;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
+import java.util.TreeSet;
+
 import me.llun.v4amounter.shared.StatusUtils;
 import me.llun.v4amounter.ui.TaskRunner;
 
 public class MountActivity extends AppCompatActivity implements TaskRunner.Callback {
 	private TextView mountStatus;
-	private TextView driverStatus;
+	private TextView fxDriverStatus;
+	private TextView viperfxDriverStatus;
+	private TextView xhifiDriverStatus;
+
 	private Button applyButton;
 	private ProgressBar progressBar;
+
 	private boolean lastMountedStatus = false;
 	private String lastOutput = "";
+
 	private final DialogInterface.OnClickListener dialogCopyLogClickedListener = new DialogInterface.OnClickListener() {
 		@Override
 		public void onClick(DialogInterface dialog, int p2) {
@@ -42,7 +53,22 @@ public class MountActivity extends AppCompatActivity implements TaskRunner.Callb
 		applyButton = findViewById(R.id.apply);
 		progressBar = findViewById(R.id.progress_bar);
 		mountStatus = findViewById(R.id.mount_status);
-		driverStatus = findViewById(R.id.driver_status);
+		viperfxDriverStatus = findViewById(R.id.viperfx_driver_status);
+		fxDriverStatus = findViewById(R.id.fx_driver_status);
+		xhifiDriverStatus = findViewById(R.id.xhifi_driver_status);
+
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		if ( sharedPreferences.getInt("preference_version" ,-1) < MountPreferenceActivity.VERSION ) {
+			sharedPreferences.edit().clear().putInt("preference_version" ,MountPreferenceActivity.VERSION).apply();
+			Toast.makeText(this ,R.string.preference_reset ,Toast.LENGTH_LONG).show();
+		}
+
+		if ( sharedPreferences.getInt("about_display_version" ,-1) < AboutActivity.VERSION ) {
+			Intent intent = new Intent(this ,AboutActivity.class);
+			startActivity(intent);
+			sharedPreferences.edit().putInt("about_display_version" ,AboutActivity.VERSION).apply();
+		}
 	}
 
 	@Override
@@ -56,15 +82,17 @@ public class MountActivity extends AppCompatActivity implements TaskRunner.Callb
 	}
 
 	@Override
-	public void onTaskFinished(final int request, final int errorCode, String output, final boolean isDriverMounted, final boolean isFriverLoaded) {
+	public void onTaskFinished(final int request, final int errorCode, String output, final boolean isDriverMounted, final boolean isXHiFiDriverLoaded, final boolean isFxDriverLoaded) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
 				applyButton.setEnabled(true);
-				progressBar.setVisibility(View.INVISIBLE);
+				progressBar.setVisibility(View.GONE);
 
 				mountStatus.setText(isDriverMounted ? R.string.mounted : R.string.unmounted);
-				driverStatus.setText(isFriverLoaded ? R.string.loaded : R.string.unloaded);
+				viperfxDriverStatus.setText(isFxDriverLoaded ? R.string.loaded : R.string.unloaded);
+				fxDriverStatus.setText(isFxDriverLoaded ? R.string.loaded : R.string.unloaded);
+				xhifiDriverStatus.setText(isXHiFiDriverLoaded ? R.string.loaded : R.string.unloaded);
 
 				applyButton.setText(isDriverMounted ? R.string.umount_and_restart_media : R.string.mount_and_restart_media);
 

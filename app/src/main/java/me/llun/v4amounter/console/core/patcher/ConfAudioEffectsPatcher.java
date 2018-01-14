@@ -1,5 +1,6 @@
-package me.llun.v4amounter.console.core;
+package me.llun.v4amounter.console.core.patcher;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -8,18 +9,22 @@ import java.util.Map;
 import me.llun.v4amounter.console.core.conf.AudioConfNode;
 import me.llun.v4amounter.console.core.conf.AudioConfParser;
 
-public class AudioEffectsPatcher {
-	private AudioConfNode root = null;
+/**
+ * Created by null on 17-12-27.
+ * For less then Android O
+ */
 
-	public AudioEffectsPatcher(String from) throws AudioConfParser.FormatException, IOException {
-		root = AudioConfParser.parse(from);
+public class ConfAudioEffectsPatcher extends AudioEffectsPatcher {
+	public ConfAudioEffectsPatcher(String file) throws IOException, AudioConfParser.FormatException {
+		root = AudioConfParser.parse(file);
 	}
 
-	public AudioEffectsPatcher() {
+	public ConfAudioEffectsPatcher() {
 		root = new AudioConfNode("root");
 	}
 
-	public void putEffect(String name, String library, String libraryPath, String uuid) {
+	@Override
+	public void putEffect(String name, String library, String libraryPath, String uuid, String soundFxDirectory) {
 		AudioConfNode libraries = root.findNodeByPath("/libraries");
 		if (libraries == null) {
 			libraries = new AudioConfNode("libraries");
@@ -32,11 +37,12 @@ public class AudioEffectsPatcher {
 			root.addChild(effects);
 		}
 
-		libraries.addChild(new AudioConfNode(library)).addValue("path", libraryPath);
+		libraries.addChild(new AudioConfNode(library)).addValue("path", soundFxDirectory + File.separator + libraryPath);
 		effects.addChild(new AudioConfNode(name)).addValue("library", library).addValue("uuid", uuid);
 	}
 
-	public void removeEffects(String... uuids) {
+	@Override
+	public void removeEffects(String ...uuid) {
 		AudioConfNode node = root.findNodeByPath("/effects");
 		if (node == null)
 			return;
@@ -44,14 +50,15 @@ public class AudioEffectsPatcher {
 		Iterator<Map.Entry<String, AudioConfNode>> iterator = node.getChildren().entrySet().iterator();
 		while (iterator.hasNext()) {
 			AudioConfNode current = iterator.next().getValue();
-			for (String uuid : uuids) {
-				if (uuid.equals(current.getValue("uuid")))
+			for (String u : uuid) {
+				if (u.equals(current.getValue("uuid")))
 					iterator.remove();
 			}
 		}
 	}
 
-	public void removeRootNodes(String... excludes) {
+	@Override
+	public void removeRootNodes(String ...excludes) {
 		Iterator<Map.Entry<String, AudioConfNode>> iterator = root.getChildren().entrySet().iterator();
 
 		while (iterator.hasNext()) {
@@ -68,11 +75,14 @@ public class AudioEffectsPatcher {
 		}
 	}
 
-	public void write(String to) throws IOException {
-		FileOutputStream stream = new FileOutputStream(to);
+	@Override
+	public void write(String output) throws Exception {
+		FileOutputStream stream = new FileOutputStream(output);
 		stream.write("# Automatically generated file.\n".getBytes());
-		stream.write("# DONT EDIT this file, it will reset after reboot.\n\n".getBytes());
+		stream.write("# DON'T EDIT this file, it will reset after reboot.\n\n".getBytes());
 		AudioConfParser.writeToStream(root, stream);
 		stream.close();
 	}
+
+	private AudioConfNode root;
 }

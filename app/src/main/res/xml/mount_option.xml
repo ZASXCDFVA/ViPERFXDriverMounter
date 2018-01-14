@@ -10,6 +10,10 @@
     </PreferenceCategory>
     <PreferenceCategory
         android:title="@string/mount_option">
+        <MultiSelectListPreference
+            android:key="mount_version"
+            android:summary="@string/version_option_summary"
+            android:title="@string/version_option"/>
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="use_tmpfs"
@@ -22,7 +26,7 @@
             android:summary="@string/disable_other_effects_summary"
             android:title="@string/disable_other_effects"/>
         <CheckBoxPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:dependency="disable_other_effects"
             android:key="trim_useless_blocks"
             android:summary="@string/trim_useless_blocks_summary"
@@ -44,4 +48,10 @@
             android:summary="@string/selinux_options_summary"
             android:title="@string/selinux_options"/>
     </PreferenceCategory>
+    <Preference android:title="@string/help_and_about">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="me.llun.v4amounter"
+            android:targetClass="me.llun.v4amounter.AboutActivity"/>
+    </Preference>
 </PreferenceScreen>

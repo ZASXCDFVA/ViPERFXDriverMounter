@@ -8,15 +8,13 @@ public class StatusUtils {
 	public static final int CHECK_EFFECTS_CONF_FILE = 2;
 	public static final int CHECK_SOUNDFX = 3;
 	public static final int CHECK_PACKAGE = 4;
-	public static final int PATCH_ETC_EFFECTS = 5;
-	public static final int PATCH_VENDOR_EFFECTS = 6;
-	public static final int COPY_ORGIN_LIBRARIES = 7;
-	public static final int EXTRACT_LIBRARY = 8;
-	public static final int MOUNT_ETC_EFFECTS = 9;
-	public static final int MOUNT_VENDOR_EFFECTS = 10;
-	public static final int MOUNT_LIBRARIES = 11;
-	public static final int RESTART_SYSTEM_SERVERS = 12;
-	public static final int RUN_PROGRAM = 13;
+	public static final int PATCH_EFFECTS_CONF = 5;
+	public static final int COPY_ORIGIN_LIBRARIES = 6;
+	public static final int EXTRACT_LIBRARY = 7;
+	public static final int MOUNT_EFFECTS_FILES = 8;
+	public static final int MOUNT_LIBRARIES = 9;
+	public static final int RESTART_SYSTEM_SERVERS = 10;
+	public static final int RUN_PROGRAM = -1;
 
 	public static int getErrorMessageResource(int errno) {
 		switch (errno) {
@@ -25,19 +23,15 @@ public class StatusUtils {
 			case CHECK_SOUNDFX:
 				return R.string.error_lost_soundfx;
 			case CHECK_PACKAGE:
-				return R.string.error_lost_viperfx;
-			case PATCH_ETC_EFFECTS:
-				return R.string.error_patch_etc_effects;
-			case PATCH_VENDOR_EFFECTS:
-				return R.string.error_patch_vendor_effects;
-			case COPY_ORGIN_LIBRARIES:
+				return R.string.error_lost_package;
+			case PATCH_EFFECTS_CONF:
+				return R.string.error_patch_effects_conf;
+			case COPY_ORIGIN_LIBRARIES:
 				return R.string.error_copy_orgin_libraries;
 			case EXTRACT_LIBRARY:
 				return R.string.error_extract_library;
-			case MOUNT_ETC_EFFECTS:
-				return R.string.error_mount_etc_effects;
-			case MOUNT_VENDOR_EFFECTS:
-				return R.string.error_mount_vendor_effects;
+			case MOUNT_EFFECTS_FILES:
+				return R.string.error_mount_effects_conf;
 			case MOUNT_LIBRARIES:
 				return R.string.error_mount_soundfx;
 			case RUN_PROGRAM:
@@ -55,34 +49,28 @@ public class StatusUtils {
 				printString = "SCRIPT BEGIN";
 				break;
 			case CHECK_EFFECTS_CONF_FILE:
-				printString = "Checking /system/etc/audio_effects.conf|/system/vendor/etc/audio_effects.conf";
+				printString = "Checking effects configure files.";
 				break;
 			case CHECK_SOUNDFX:
-				printString = "Checking /system/lib/soundfx";
+				printString = "Checking soundfx directories";
 				break;
 			case CHECK_PACKAGE:
-				printString = "Checking " + GlobalProperty.DEFAILT_VIPERFX_PACKAGE_NAME + " package";
+				printString = "Checking packages";
 				break;
-			case PATCH_ETC_EFFECTS:
+			case PATCH_EFFECTS_CONF:
 				printString = "Patching /system/etc/audio_effects.conf";
 				break;
-			case PATCH_VENDOR_EFFECTS:
-				printString = "Patching /system/vendor/etc/audio_effects.conf";
-				break;
-			case COPY_ORGIN_LIBRARIES:
-				printString = "Copying /system/lib/soundfx libraries";
+			case COPY_ORIGIN_LIBRARIES:
+				printString = "Copying origin libraries";
 				break;
 			case EXTRACT_LIBRARY:
-				printString = "Extracting " + GlobalProperty.DEFAILT_VIPERFX_PACKAGE_NAME + " library";
+				printString = "Extracting libraries";
 				break;
-			case MOUNT_ETC_EFFECTS:
-				printString = "Mounting /system/etc/audio_effects.conf";
-				break;
-			case MOUNT_VENDOR_EFFECTS:
-				printString = "Mounting /system/vendor/etc/audio_effects.conf";
+			case MOUNT_EFFECTS_FILES:
+				printString = "Mounting effects configure";
 				break;
 			case MOUNT_LIBRARIES:
-				printString = "Mounting /system/lib/soundfx";
+				printString = "Mounting soundfx directories";
 				break;
 			case RESTART_SYSTEM_SERVERS:
 				printString = "Restarting system servers";
@@ -93,5 +81,10 @@ public class StatusUtils {
 		}
 
 		System.out.println(String.format("[%X] %s", statusCode, printString));
+	}
+
+	public static void printExtraMessage(String msg) {
+		System.out.print("---    ");
+		System.out.println(msg);
 	}
 }

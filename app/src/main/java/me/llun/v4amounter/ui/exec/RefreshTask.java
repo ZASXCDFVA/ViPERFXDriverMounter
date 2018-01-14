@@ -22,15 +22,17 @@ public class RefreshTask {
 					result.isDriverMounted = true;
 			}
 			reader.close();
-		} catch (Exception e) {
-		}
+		} catch (Exception ignored) {}
 
-		UUID uuid = UUID.fromString(GlobalProperty.DEFAULT_VIPERFX_UUID);
+		UUID fxUUID = UUID.fromString(GlobalProperty.VIPERFX_UUID);
+		UUID xHiFiUUID = UUID.fromString(GlobalProperty.V4A_XHIFI_UUID);
 		AudioEffect.Descriptor[] effects = AudioEffect.queryEffects();
 		if (effects != null) {
 			for (AudioEffect.Descriptor descriptor : AudioEffect.queryEffects()) {
-				if (uuid.equals(descriptor.uuid))
-					result.isDriverLoaded = true;
+				if (fxUUID.equals(descriptor.uuid))
+					result.isFxDriverLoaded = true;
+				else if ( xHiFiUUID.equals(descriptor.uuid) )
+					result.isXHiFiDriverLoaded = true;
 			}
 		}
 
@@ -39,6 +41,7 @@ public class RefreshTask {
 
 	public static class RefreshResult {
 		public boolean isDriverMounted = false;
-		public boolean isDriverLoaded = false;
+		public boolean isFxDriverLoaded = false;
+		public boolean isXHiFiDriverLoaded = false;
 	}
 }

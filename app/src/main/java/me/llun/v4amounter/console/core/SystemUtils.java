@@ -15,18 +15,6 @@ public class SystemUtils {
 		return new File("/sys/fs/selinux/enforce").isFile();
 	}
 
-	public static boolean hasSystemEffects() {
-		return new File("/system/etc/audio_effects.conf").isFile();
-	}
-
-	public static boolean hasSystemVendorEffects() {
-		return new File("/system/vendor/etc/audio_effects.conf").isFile();
-	}
-
-	public static boolean hasSystemSoundfx() {
-		return new File("/system/lib/soundfx").isDirectory();
-	}
-
 	public static int checkServerStatus(String name) throws IOException, InterruptedException {
 		Shell.ShellResult result = Shell.run("getprop init.svc." + name);
 

@@ -1,31 +1,82 @@
 package me.llun.v4amounter.console.core;
 
-import me.llun.v4amounter.shared.GlobalProperty;
+import java.util.LinkedList;
 
 public class MountProperty {
-	public String mountPoint;
-	public String packagePath;
-	public String libraryEntry;
-	public boolean useDiskMountPoint;
-	public boolean disableOtherEffects;
-	public boolean trimUselessBlocks;
-	public boolean patchAudioPolicy;
-	public boolean disableSELinux;
-	public boolean patchSELinuxPolicy;
+	public static final int MOUNT_POINT_MODE_TMPFS = 1;
+	public static final int MOUNT_POINT_MODE_DISK = 2;
+
+	public static final int SELINUX_MODE_DISABLE = 1;
+	public static final int SELINUX_MODE_PATCH_POLICY = 2;
+
+	public int mountPointMode = MOUNT_POINT_MODE_TMPFS;
+	public int selinuxMode = SELINUX_MODE_PATCH_POLICY;
+
+	public boolean disableOtherEffects = false;
+	public boolean trimUselessBlocks = true;
+	public boolean patchAudioPolicy = true;
+
+	public LinkedList<Effect> effects = new LinkedList<>();
+
 	public MountProperty(Options opt) throws Options.OptionParseException {
-		packagePath = opt.readData();
-		libraryEntry = opt.readData();
+		while ( opt.hasNext() ) {
+			String arg = opt.nextArgument();
+			switch ( arg ) {
+				case "--use-disk" :
+					mountPointMode = MOUNT_POINT_MODE_DISK;
+					break;
+				case "--use-tmpfs" :
+					mountPointMode = MOUNT_POINT_MODE_TMPFS;
+					break;
+				case "--add-effect" :
+					this.addEffect(opt.nextArgument());
+					break;
+				case "--disable-other-effects" :
+					disableOtherEffects = true;
+					break;
+				case "--patch-audio-policy" :
+					patchAudioPolicy = true;
+					break;
+				case "--trim-useless-blocks" :
+					trimUselessBlocks = true;
+					break;
+				case "--disable-selinux" :
+					selinuxMode = SELINUX_MODE_DISABLE;
+					break;
+				case "--patch-selinux-policy" :
+					selinuxMode = SELINUX_MODE_PATCH_POLICY;
+					break;
+				default:
+					throw new Options.OptionParseException("Invalid argument " + arg + " .");
+			}
+		}
+	}
 
-		disableOtherEffects = opt.checkOption("--disable-other-effects", true, false);
-		trimUselessBlocks = opt.checkOption("--trim-useless-blocks", true, false);
+	private void addEffect(String argument) throws Options.OptionParseException {
+		String[] effectRaw = argument.split(":");
+		if ( effectRaw.length != 7 )
+			throw new Options.OptionParseException("Invalid argument " + argument + " .");
 
-		patchAudioPolicy = opt.checkOption("--patch-audio-policy", true, false);
-		disableSELinux = opt.checkOption("--disable-selinux", true, false);
-		patchSELinuxPolicy = opt.checkOption("--patch-selinux-policy", true, false);
-		useDiskMountPoint = opt.checkOption("--use-disk", true, false);
+		Effect effect = new Effect();
 
-		mountPoint = useDiskMountPoint ? GlobalProperty.DEFAULT_MOUNT_POINT_DISK : GlobalProperty.DEFAULT_MOUNT_POINT_TMPFS;
+		effect.name = effectRaw[0];
+		effect.library = effectRaw[1];
+		effect.libraryName = effectRaw[2];
+		effect.uuid = effectRaw[3];
+		effect.packageName = effectRaw[4];
+		effect.packagePath = effectRaw[5];
+		effect.packageLibraryEntry = effectRaw[6];
 
-		opt.finishParse();
+		effects.add(effect);
+	}
+
+	public static class Effect {
+		public String name;
+		public String library;
+		public String libraryName;
+		public String uuid;
+		public String packageName;
+		public String packagePath;
+		public String packageLibraryEntry;
 	}
 }
