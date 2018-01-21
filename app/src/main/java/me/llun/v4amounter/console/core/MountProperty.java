@@ -13,8 +13,8 @@ public class MountProperty {
 	public int selinuxMode = SELINUX_MODE_PATCH_POLICY;
 
 	public boolean disableOtherEffects = false;
-	public boolean trimUselessBlocks = true;
-	public boolean patchAudioPolicy = true;
+	public boolean trimUselessBlocks = false;
+	public boolean patchAudioPolicy = false;
 
 	public LinkedList<Effect> effects = new LinkedList<>();
 
